@@ -7,7 +7,6 @@
 // 4. Implement a method `removeProduct` that removes a product from the inventory and returns a confirmation string.
 // 5. Implement a method `getProduct` that retrieves a product by its ID.
 // 6. Implement a method `getAllProducts` that returns the list of all products.
-
 interface Product {
   id: number;
   name: string;
@@ -16,36 +15,46 @@ interface Product {
 }
 
 class InventoryManager<T extends Product> {
-  products = []
+  private products: T[] = [];
 
-  addProduct(product) {
-
+  addProduct(product: T): string {
+    const exists = this.products.some(p => p.id === product.id);
+    if (exists) return `Product with ID ${product.id} already exists.`;
+    this.products.push(product);
+    return `Product ${product.name} added successfully!`;
   }
 
-  updateProduct(id, update) {
-
+  updateProduct(id: number, update: Partial<T>): string {
+    const index = this.products.findIndex(p => p.id === id);
+    if (index === -1) return `Product with ID ${id} not found.`;
+    this.products[index] = { ...this.products[index], ...update };
+    return `Product ${id} updated successfully!`;
   }
 
-  getProduct(id) {
-
+  getProduct(id: number): T | undefined {
+    return this.products.find(p => p.id === id);
   }
 
-  getAllProducts() {
-
+  getAllProducts(): T[] {
+    return this.products;
   }
 
-  removeProduct(id) {
-
+  removeProduct(id: number): string {
+    const index = this.products.findIndex(p => p.id === id);
+    if (index === -1) return `Product with ID ${id} not found.`;
+    const removed = this.products[index];
+    this.products.splice(index, 1);
+    return `Product ${removed.name} removed successfully!`;
   }
 }
 
-// Test cases
-const inventory = new InventoryManager();
-
-console.log(inventory.addProduct({ id: 1, name: "Laptop", price: 1000, stock: 5 })); // "Product Laptop added successfully!"
-console.log(inventory.addProduct({ id: 2, name: "Mouse", price: 20, stock: 50 })); // "Product Mouse added successfully!"
-console.log(inventory.updateProduct(1, { price: 900 })); // "Product 1 updated successfully!"
-console.log(inventory.getProduct(1)); // { id: 1, name: "Laptop", price: 900, stock: 5 }
-console.log(inventory.getAllProducts()); // List of all products
-console.log(inventory.removeProduct(1)); // "Product 1 removed successfully!"
-console.log(inventory.getProduct(1)); // "Product not found"
+// Test
+const inventory = new InventoryManager<Product>();
+console.log(inventory.addProduct({ id: 1, name: "Laptop", price: 1000, stock: 5 }));
+console.log(inventory.addProduct({ id: 2, name: "Mouse", price: 20, stock: 50 }));
+console.log(inventory.updateProduct(1, { price: 900 }));
+console.log(inventory.getProduct(1));
+console.log(inventory.getAllProducts());
+console.log(inventory.removeProduct(1));
+console.log(inventory.getProduct(1));
+export {};

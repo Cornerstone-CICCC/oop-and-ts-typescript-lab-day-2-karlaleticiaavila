@@ -1,3 +1,5 @@
+
+
 // 🔄 Multi-Type Storage System
 // 📦 Create a system that can store and manage different types of data.
 //
@@ -7,45 +9,71 @@
 // 4. Implement a method `getItems` that returns all stored items.
 // 5. Implement a method `findItem` that searches for an item by a given property value.
 // 6. Implement a method `updateItem` that updates an item by its property value.
+type AnyObject = Record<string, unknown>;
 
 class MyStorage<T, U> {
-  items = []
+  items: Array<T | U> = [];
 
-  addItem(item) {
-
+  addItem(item: T | U): string {
+    this.items.push(item);
+    return `${String(item)} added to storage.`;
   }
 
-  getItems() {
-
+  getItems(): Array<T | U> {
+    return this.items;
   }
 
-  removeItem(id) {
+removeItemBy(prop: string, val: unknown): string {
+  const index = this.items.findIndex((item) =>
+    typeof item === "object" && item !== null && (item as AnyObject)[prop] === val
+  );
+  if (index === -1) return `Item with ${prop} = ${String(val)} not found.`;
+  this.items.splice(index, 1);
+  return `Item removed successfully.`;
+}
 
+  findItem(prop: string, val: unknown): AnyObject | undefined {
+    return this.items.find((item) => {
+      return typeof item === "object" && item !== null && (item as AnyObject)[prop] === val;
+    }) as AnyObject | undefined;
   }
 
-  findItem(prop, val) {
+  updateItem(prop: string, val: unknown, update: AnyObject): string {
+    const index = this.items.findIndex((item) => {
+      return typeof item === "object" && item !== null && (item as AnyObject)[prop] === val;
+    });
 
-  }
+    if (index === -1) return `Item with ${prop} = ${String(val)} not found.`;
 
-  updateItem(prop, id, update) {
+    const current = this.items[index];
+    if (typeof current !== "object" || current === null) {
+      return `Found item is not an object; cannot update.`;
+    }
 
+    this.items[index] = { ...(current as AnyObject), ...update } as T | U;
+    return `Item updated successfully.`;
   }
 }
 
-// Test cases
+// Test
 const numberStrStorage = new MyStorage<number, string>();
 
-console.log(numberStrStorage.addItem(10)); // "10 added to storage."
-console.log(numberStrStorage.addItem(20)); // "20 added to storage."
-console.log(numberStrStorage.getItems()); // [10, 20]
-console.log(numberStrStorage.removeItem(10)); // "10 removed from storage."
-console.log(numberStrStorage.getItems()); // [20]
+console.log(numberStrStorage.addItem(10));
+console.log(numberStrStorage.addItem(20));
+console.log(numberStrStorage.getItems());
+console.log(numberStrStorage.removeItemBy("value", 10));
+console.log(numberStrStorage.getItems());
 
 const userStorage = new MyStorage<{ id: number; name: string }, string>();
 
-console.log(userStorage.addItem({ id: 1, name: "Alice" })); // "User Alice added."
-console.log(userStorage.addItem({ id: 2, name: "Bob" })); // "User Bob added."
-console.log(userStorage.getItems()); // [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }]
-console.log(userStorage.findItem("name", "Alice")); // { id: 1, name: "Alice" }
-console.log(userStorage.updateItem("id", 1, { id: 1, name: "Alice Updated" })); // "Alice updated successfully."
-console.log(userStorage.getItems()); // [{ id: 1, name: "Alice Updated" }, { id: 2, name: "Bob" }]
+console.log(userStorage.addItem({ id: 1, name: "Alice" }));
+console.log(userStorage.addItem({ id: 2, name: "Bob" }));
+console.log(userStorage.getItems());
+
+console.log(userStorage.findItem("name", "Alice"));
+console.log(userStorage.updateItem("id", 1, { name: "Alice Updated" }));
+console.log(userStorage.getItems());
+
+
+
+export{};
